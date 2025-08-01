@@ -43,3 +43,5 @@ spring.log
 
 #Build artifacts
 server/build/
+
+dist/

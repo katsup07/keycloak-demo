@@ -1,0 +1,140 @@
+## Implementation Plan
+
+## Phase 1: Infrastructure Setup
+
+#### Step 1.1: Docker Environment Setup
+- [done] Create `docker-compose.yml` with Keycloak and PostgreSQL
+- [done] Configure environment variables for Keycloak
+- [done] Set up persistent volumes for database
+- [done] Test Keycloak admin console access
+- [done] **Port Management**: 
+  - Keycloak: 8080
+  - Spring Boot: 8081
+  - React: 3000
+  - PostgreSQL: 5432
+- [done] **Data Persistence**:
+  - Named volumes for PostgreSQL data
+
+#### Step 1.2: Keycloak Configuration
+- [done] Create realm: `keycloak-demo`
+- [done] Configure OAuth2 client: `react-client`
+  - Client Type: Public
+  - Valid Redirect URIs: `http://localhost:3000/*`
+  - Web Origins: `http://localhost:3000`
+- [done] Create roles: `admin`, `user`
+- [done] Create test users:
+  - `admin@test.com` with admin role
+  - `user@test.com` with user role
+- [done] Configure token settings (access token lifespan, refresh token settings)
+- [done] **Security Configuration Details**:
+  - Access Type: `confidential`
+  - Standard Flow: Enabled
+  - Direct Access Grants: Enabled
+  - Valid Redirect URIs: `http://localhost:8081/*`
+  - Token lifespans: Access token (15min), Refresh token (30 days)
+  - CORS origins: Explicitly list allowed origins (`http://localhost:3000`, `http://localhost:8081`)
+
+#### Database Backup Notes 
+# Development Note: Run this whenever you want a new backup of the DB before making changes
+docker exec keycloak-postgres pg_dump -U keycloak keycloak > keycloak_backup_$(date +%Y%m%d_%H%M%S).sql
+# Production Note: Set up a cron job for automated daily backups in production
+# Example cron job (runs daily at 2 AM):
+# 0 2 * * * docker exec keycloak-postgres pg_dump -U keycloak keycloak > /path/to/backups/keycloak_backup_$(date +\%Y\%m\%d_\%H\%M\%S).sql
+
+
+### Phase 2: Backend Development
+
+#### Step 2.1: Spring Boot Project Setup
+- [done] Initialize Spring Boot project with dependencies:
+  - `spring-boot-starter-web`
+  - `spring-boot-starter-security`
+  - `spring-boot-starter-oauth2-resource-server`
+  - `keycloak-spring-boot-starter`
+- [done] Configure application properties for Keycloak integration
+- [done] Set up CORS configuration
+
+#### Step 2.2: Security Configuration
+- [done] Configure OAuth2 resource server
+- [done] Implement JWT token validation
+- [done] Set up method-level security with role-based access
+- [done] Configure Keycloak adapter properties
+
+#### Step 2.3: API Endpoints Implementation
+- [done] Create `AdminController` with `/api/admin/data` endpoint
+- [done] Create `UserController` with `/api/user/data` endpoint  
+- [done] Create `PublicController` with `/api/public/info` endpoint
+- [done] Implement role-based authorization using `@PreAuthorize`
+- [done] Add error handling for unauthorized access
+
+
+### Phase 3: Frontend Development
+
+#### Step 3.1: React Project Setup
+- [done] Create React application using Vite with React 18 and set port to 3000
+- [done] Install Keycloak JavaScript adapter: `keycloak-js@^24.0.0` (latest stable)
+- [done] Install additional dependencies: 
+  - `axios@^1.6.0` - HTTP client
+  - `react-router-dom@^6.20.0` - routing
+  - `react-toastify@^9.1.0` - notifications
+  - `zustand@^4.4.0` - state management
+- [done] **React Version Choice**: 
+  - **Recommended**: React 18 (stable, production-ready, full ecosystem support)
+- [done] **State Management Choice**: 
+  - **Recommended for Demo**: Use Zustand (most flexible, easiest to understand, least boilerplate)
+  - **Alternative**: Jotai for atomic state management or React Context API
+- [done] Set up project structure with components, services, and utils folders
+- [done] Configure routing with React Router
+
+#### Step 3.2: Keycloak Integration
+- [done] Configure Keycloak client in React app (realm: `keycloak-demo`, client: `react-client`)
+- [done] Create functional Keycloak service module for initialization and token management:
+  - `initializeKeycloak()` - initialize and configure Keycloak instance
+  - `login()`, `logout()` - authentication methods
+  - `getToken()`, `getUserInfo()` - token and user data access
+  - `hasRole()` - role checking utility
+- [done] Create authentication store using Zustand:
+  - State: `{ user, isAuthenticated, roles, isLoading }`
+  - Actions: `initializeAuth()`, `login()`, `logout()`
+  - Selectors: `hasRole()`, `isAdmin()` 
+- [done] Set up Keycloak initialization in app startup
+- [done] Create protected route wrapper component with role-based access
+- [done] Set up token refresh mechanism with automatic token renewal
+
+#### Step 3.3: UI Components Development
+- [done] Create Landing/Home component with login button (redirects to Keycloak)
+- [done] Create Admin Dashboard component:
+  - Display admin-specific data from `/api/admin/data` endpoint
+  - Show user management interface (if desired)
+  - Include role indicator and user info
+- [done] Create User Dashboard component:
+  - Display user-specific data from `/api/user/data` endpoint
+  - Show user profile information
+  - Include role indicator
+- [done] Create Navigation component with role-based menu items
+- [done] Implement logout functionality with proper cleanup
+- [done] Add loading states and error boundaries
+
+#### Step 3.4: API Integration & Error Handling
+- [done] Set up Axios interceptors for automatic token attachment
+- [done] Implement automatic token refresh on 401 responses
+- [done] Create API service methods for all backend endpoints:
+  - `getPublicInfo()` - calls `/api/public/info`
+  - `getAdminData()` - calls `/api/admin/data`
+  - `getUserData()` - calls `/api/user/data`
+- [done] Handle edge cases:
+  - Token expiration during app usage
+  - Network connectivity issues
+  - Keycloak server unavailability
+
+#### Step 3.5: User Experience Enhancements
+- [done] Add role-based conditional rendering throughout the app
+- [done] Implement automatic redirection after login based on user role
+- [done] Create a "unauthorized access" page for 403 errors
+- [done] Add loading spinners for API calls
+- [done] Implement proper error messaging with user-friendly text
+- [done] Add logout confirmation dialog
+- [] Implement toast notifications for:
+  - Login success/failure
+  - API errors (403 Forbidden, 401 Unauthorized)
+  - Network errors
+  - Token refresh failures

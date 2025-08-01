@@ -1,0 +1,44 @@
+# Environment variables
+.env.local
+.env.production
+src/main/resources/application.properties
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node modules (for future React app)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Spring Boot (for future backend)
+target/
+*.jar
+*.war
+*.ear
+*.logs
+spring.log
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+#Build artifacts
+server/build/

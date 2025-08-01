@@ -1,0 +1,3 @@
+export const BACKGROUND_REFRESH_TOKEN_INTERVAL = 10 * 1000 * 60;
+
+export const TOKEN_MIN_VALIDITY = 60;

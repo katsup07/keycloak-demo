@@ -138,3 +138,51 @@ docker exec keycloak-postgres pg_dump -U keycloak keycloak > keycloak_backup_$(d
   - API errors (403 Forbidden, 401 Unauthorized)
   - Network errors
   - Token refresh failures
+
+## Phase 4: Alternative TypeScript Backend
+
+#### Step 4.1: TypeScript/Express Project Setup
+- [done] Create `server-ts` directory with TypeScript/Express project
+- [done] Initialize with dependencies:
+  - `express`, `typescript`, `@types/node`, `@types/express`
+  - `jsonwebtoken`, `jwks-rsa` - JWT validation with Keycloak
+  - `cors`, `helmet` - Security middleware
+  - `express-rate-limit` - Rate limiting
+  - `dotenv` - Environment configuration
+  - `winston` - Logging
+- [done] Configure TypeScript build setup with `tsconfig.json`
+- [done] Set up development scripts with `nodemon` and `ts-node`
+- [done] Configure environment variables for Keycloak integration
+
+#### Step 4.2: Security & Middleware Configuration
+- [done] Implement JWT validation middleware using Keycloak's JWKS endpoint
+- [done] Create role-based authorization middleware (`requireRole('admin')`, `requireRole('user')`)
+- [done] Configure CORS for React frontend (`http://localhost:3000`)
+- [done] Set up security headers with Helmet
+- [done] Implement rate limiting for API endpoints
+- [done] Add request logging middleware with Winston
+- [done] Create centralized error handling middleware for consistent API responses
+- [done] Set up automatic promise rejection handling (Express 5.x feature)
+
+#### Step 4.3: API Endpoints Implementation
+- [done] Create identical endpoint structure to Java backend:
+  - `GET /api/public/info` - Public endpoint (no auth required)
+  - `GET /api/user/data` - User role required
+  - `GET /api/admin/data` - Admin role required
+- [done] Implement same response format as Java backend for compatibility
+- [done] Add proper error responses (401, 403, 500) with consistent format
+- [done] Include request validation and sanitization
+
+#### Step 4.4: Backend Comparison & Testing
+- [] Run both backends simultaneously (Java on 8081, TS on 8082)
+- [] Add backend selection toggle in React frontend
+- [] Create environment variable to switch between backends
+- [] Performance comparison testing
+- [] Security audit comparison
+- [] Documentation of differences and trade-offs
+
+#### Step 4.5: Containerization & Deployment
+- [] Create Dockerfile for TypeScript backend
+- [] Update docker-compose.yml to include TS backend option
+- [] Configure health checks and monitoring
+- [] Document deployment differences between Java and TS backends

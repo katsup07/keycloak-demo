@@ -27,8 +27,8 @@ import java.util.stream.Collectors;
 public class SecurityConfig {
     private static final long CORS_MAX_AGE = 3600L; // 1 hour
 
-    @Value("${keycloak.client-name}")
-    private String clientName;
+    @Value("${keycloak.client-id}")
+    private String clientId;
 
     @Value("${cors.allowed-origins}")
     private String[] allowedOrigins;
@@ -77,7 +77,7 @@ public class SecurityConfig {
             // Add client/resource roles (if any are assigned to the react-client)
             Map<String, Object> resourceAccess = jwt.getClaimAsMap("resource_access");
             if (resourceAccess != null) {
-                Object clientAccessObj = resourceAccess.get(clientName);
+                Object clientAccessObj = resourceAccess.get(clientId);
                 if (clientAccessObj instanceof Map) {
                     Map<?, ?> clientAccess = (Map<?, ?>) clientAccessObj;
                     validateAndAddRoles(clientAccess.get("roles"), authorities);

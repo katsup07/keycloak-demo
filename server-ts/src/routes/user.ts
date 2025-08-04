@@ -4,10 +4,8 @@ import { logger } from '../utils/logger';
 
 const router = Router();
 
-// Apply JWT validation to all user routes
 router.use(validateJWT);
-
-// GET /api/user/data - User role required
+// GET /api/user/data - ユーザーロールが必要
 router.get('/data', requireUser, (req: Request, res: Response) => {
   logger.info('User data endpoint accessed', {
     userId: req.user?.sub,
@@ -25,7 +23,7 @@ router.get('/data', requireUser, (req: Request, res: Response) => {
     },
   });
 });
-
+// GET /api/user/profile - ユーザーロールが必要
 router.get('/profile', requireUser, (req: Request, res: Response) => {
   logger.info('User profile endpoint accessed', {
     userId: req.user?.sub,

@@ -3,7 +3,7 @@ import { logger } from '../utils/logger';
 
 const router = Router();
 
-// GET /api/public/info - Public endpoint (no auth required)
+// GET /api/public/info - パブリック・エンドポイント (認証不要)
 router.get('/info', (req: Request, res: Response) => {
   logger.info('Public info endpoint accessed', {
     ip: req.ip,

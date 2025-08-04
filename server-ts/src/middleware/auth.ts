@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { logger } from '../utils/logger';
 import { createError } from './errorHandler';
 
-// Extend Request interface to include user info
+// リクエストインターフェースを拡張してユーザー情報を含める
 declare global {
   namespace Express {
     interface Request {
@@ -25,11 +25,14 @@ declare global {
   }
 }
 
+interface CustomJwtPayload extends JwtPayload {
+  sub: string;
+}
+
 if(!process.env.JWK_SET_URI) 
   throw new Error("JWK_SET_URI is not defined");
 
-// JWKS(JSON Web Key Set) client for Keycloak
-// the jwksUri points to the JWKS endpoint of the Keycloak server. This endpoint provides the public keys that correspond to the private keys used by Keycloak to sign JWTs. The jwksClient library fetches these keys and caches them for efficient token verification.
+// JSON Web Key Set client for Keycloak: JWKSエンドポイントからpublic keyを取得してキャッシュし、トークンを検証する
 const TEN_MINUTES = 10 * 60 * 1000;
 const client = jwksClient({
   jwksUri: process.env.JWK_SET_URI,
@@ -37,25 +40,29 @@ const client = jwksClient({
   cacheMaxEntries: 5,
   cacheMaxAge: TEN_MINUTES,
   rateLimit: true,
-  jwksRequestsPerMinute: 10, // Default value
+  jwksRequestsPerMinute: 10,
 });
 
-// Get signing key from JWKS
+// JWKSからsigning keyを取得する
 const getPublicSigningKey = (header: any, callback: any) => {
-  console.log("client: ", client); // TODO: Remove this
-  // kid means key identifier
+   // kid means key identifier
+  if (!header.kid) {
+    logger.error('JWT header does not contain kid (key identifier)');
+    return callback(new Error('Invalid JWT header'));
+  }
+ 
   client.getSigningKey(header.kid, (err, key) => {
     if (err) {
       logger.error('Error getting public signing key:', err);
       return callback(err);
     }
-    const publicSigningKey = key?.getPublicKey(); // key used to verify the JWT signature
+    const publicSigningKey = key?.getPublicKey();
     callback(null, publicSigningKey);
   });
 };
 
-// JWT validation middleware
-export const validateJWT = async (req: Request, _: Response, next: NextFunction): Promise<void> => {
+// JWT検証ミドルウェア
+export const validateJWT = async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
   if(!process.env.ISSUER_URI)
     throw new Error("ISSUER_URI is not defined");
 
@@ -67,25 +74,17 @@ export const validateJWT = async (req: Request, _: Response, next: NextFunction)
 
     const token = extractToken(authHeader);
 
-    console.log("token", token); // TODO: Remove this
-    // Verify JWT token
     jwt.verify(token, getPublicSigningKey, {
       audience: process.env.KEYCLOAK_CLIENT_ID,
       issuer: process.env.ISSUER_URI,
       algorithms: ['RS256']
     }, (err, decoded) => {
-      console.log("decoded", decoded);
       if (err) {
         logger.error('JWT verification failed:', err);
         return next(createError('Invalid token', 401));
       }
-      // Attach user info to request
-      req.user = decoded as any;
-      // TODO: remove
-      logger.info('JWT validated successfully', {
-        userId: req.user?.sub,
-        username: req.user?.preferred_username
-      });
+      // ユーザー情報をリクエストに添付する
+      req.user = decoded as CustomJwtPayload;
 
       next();
     });
@@ -106,7 +105,7 @@ const extractToken = (authHeader?: string) => {
   return token;
 };
 
-// Role-based authorization middleware
+// ロールベースの認可ミドルウェア
 const requireRole = (requiredRole: string) => {
   if(!process.env.KEYCLOAK_CLIENT_ID)
   throw new Error("KEYCLOAK_CLIENT_ID is not defined");
@@ -120,10 +119,8 @@ const requireRole = (requiredRole: string) => {
       const clientRoles = req.user.resource_access?.[process.env.KEYCLOAK_CLIENT_ID ?? '']?.roles || [];
       const allRoles = [...userRoles, ...clientRoles];
 
-      // TODO: remove userID
       if (!allRoles.includes(requiredRole)) {
         logger.warn('Access denied - insufficient permissions', {
-          userId: req.user.sub,
           requiredRole,
           userRoles: allRoles
         });
@@ -131,7 +128,6 @@ const requireRole = (requiredRole: string) => {
       }
 
       logger.info('Role authorization successful', {
-        userId: req.user.sub,
         requiredRole,
         userRoles: allRoles
       });
@@ -143,6 +139,6 @@ const requireRole = (requiredRole: string) => {
   };
 };
 
-// Convenience middleware for common roles
+// 一般的なロールのための便利なミドルウェア
 export const requireAdmin = requireRole('admin');
 export const requireUser = requireRole('user');

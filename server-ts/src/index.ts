@@ -1,4 +1,4 @@
-// Load environment variables first, before any other imports
+// 環境変数を最初に読み込む
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -9,11 +9,11 @@ import { logger } from './utils/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
 
-// Routes
+// ルート
 import publicRoutes from './routes/public';
 import userRoutes from './routes/user';
 import adminRoutes from './routes/admin';
-import { rateLimiter } from './utils/rateLimiter';
+import { rateLimiter } from './middleware/rateLimiter';
 import { sendNotFoundError } from './utils/sendNotFoundError';
 
 
@@ -21,10 +21,10 @@ import { sendNotFoundError } from './utils/sendNotFoundError';
 const app = express();
 const PORT = process.env.PORT || 8082;
 
-// Security middleware
+// セキュリティミドルウェア
 app.use(helmet());
 
-// CORS configuration
+// CORS設定
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true,
@@ -33,17 +33,15 @@ app.use(cors({
   exposedHeaders: ['Authorization', 'Content-Disposition']
 }));
 
-// Rate limiting
 app.use(rateLimiter);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging
 app.use(requestLogger);
 
-// Health check endpoint
+// ヘルスチェックエンドポイント
 app.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'OK',
@@ -53,30 +51,28 @@ app.get('/health', (_req, res) => {
   });
 });
 
-// API routes
+// APIルート
 app.use('/api/public', publicRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
 
-// 404 handler
+// 404ハンドラー
 app.use(sendNotFoundError);
 
-// Error handling middleware
 app.use(errorHandler);
 
-// Handle unhandled promise rejections
+// 未処理のプロミス拒否を処理する
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  // Application specific logging, throwing an error, or other logic etc.
+  // アプリケーション固有のロギング、エラーのスロー、または他のロジックなど
 });
 
-// Handle uncaught exceptions
+// 処理されていないexceptionsを処理する
 process.on('uncaughtException', (error) => {
   logger.error('Uncaught Exception thrown:', error);
   process.exit(1);
 });
 
-// Start server
 app.listen(PORT, () => {
   logger.info(`🚀 TypeScript Express server running on port ${PORT}`);
   logger.info(`📊 Health check available at http://localhost:${PORT}/health`);

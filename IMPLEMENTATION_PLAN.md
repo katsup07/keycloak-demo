@@ -177,12 +177,10 @@ docker exec keycloak-postgres pg_dump -U keycloak keycloak > keycloak_backup_$(d
 - [] Run both backends simultaneously (Java on 8081, TS on 8082)
 - [] Add backend selection toggle in React frontend
 - [] Create environment variable to switch between backends
-- [] Performance comparison testing
-- [] Security audit comparison
-- [] Documentation of differences and trade-offs
 
-#### Step 4.5: Containerization & Deployment
+
+<!-- #### Step 4.5: Containerization & Deployment
 - [] Create Dockerfile for TypeScript backend
 - [] Update docker-compose.yml to include TS backend option
 - [] Configure health checks and monitoring
-- [] Document deployment differences between Java and TS backends
+- [] Document deployment differences between Java and TS backends -->

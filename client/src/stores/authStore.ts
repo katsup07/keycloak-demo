@@ -43,7 +43,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initializeAuth: async () => {
     // 複数初期化防止
     if (get().isAuthStoreInitialized) {
-      console.log('Auth store has already been initialized');
       set({ isLoading: false });
       return;
     }

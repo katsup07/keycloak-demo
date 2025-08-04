@@ -4,10 +4,9 @@ import { logger } from '../utils/logger';
 
 const router = Router();
 
-// Apply JWT validation to all admin routes
 router.use(validateJWT);
 
-// GET /api/admin/data - Admin role required
+// GET /api/admin/data - 管理者ロールが必要
 router.get('/data', requireAdmin, (req: Request, res: Response) => {
   logger.info('Admin data endpoint accessed', {
     userId: req.user?.sub,

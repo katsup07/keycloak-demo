@@ -13,14 +13,14 @@ export const logger = winston.createLogger({
   ),
   defaultMeta: { service: 'keycloak-demo-ts' },
   transports: [
-    // Write all logs with importance level of `error` or less to `error.log`
+    // 重要度が`error`以下のすべてのログを`error.log`に書き込む
     new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    // Write all logs with importance level of `info` or less to `combined.log`
+    // 重要度が`info`以下のすべてのログを`combined.log`に書き込む
     new winston.transports.File({ filename: 'logs/combined.log' }),
   ],
 });
 
-// Logs to console if not in production
+// 本番環境でない場合はコンソールにログを出力する
 if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
     format: winston.format.combine(

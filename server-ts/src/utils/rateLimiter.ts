@@ -3,9 +3,13 @@ import { logger } from './logger';
 import { createError } from '../middleware/errorHandler';
 
 const whitelist = ['127.0.0.1', '::1']; // local IPs or other trusted IPs
-
+const FIFTEEN_MINUTES = 15 * 60 * 1000;
+/**
+ * Rate limiter middleware to limit the number of requests from a single IP address.
+ * This is useful to prevent abuse and DoS attacks.
+ */
 export const rateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: FIFTEEN_MINUTES,
   max: 100, // limit each IP to 100 requests per windowMs
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,

@@ -3,8 +3,8 @@ import * as keycloakService from '../services/keycloakService';
 
 export const getBearerHeader = () => {
   const token = keycloakService.getToken();
-  if (token)
-    return `Bearer ${token}`;
+  
+  if (!token) return;
 
-  return '';
+  return `Bearer ${token}`;
 };

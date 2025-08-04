@@ -61,13 +61,13 @@ app.use('/api/admin', adminRoutes);
 // 404 handler
 app.use(sendNotFoundError);
 
-// Error handling middleware (must be last)
+// Error handling middleware
 app.use(errorHandler);
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  // Application specific logging, throwing an error, or other logic here
+  // Application specific logging, throwing an error, or other logic etc.
 });
 
 // Handle uncaught exceptions

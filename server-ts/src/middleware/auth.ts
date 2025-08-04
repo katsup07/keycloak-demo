@@ -25,41 +25,51 @@ declare global {
   }
 }
 
+if(!process.env.JWK_SET_URI) 
+  throw new Error("JWK_SET_URI is not defined");
+
 // JWKS(JSON Web Key Set) client for Keycloak
 // the jwksUri points to the JWKS endpoint of the Keycloak server. This endpoint provides the public keys that correspond to the private keys used by Keycloak to sign JWTs. The jwksClient library fetches these keys and caches them for efficient token verification.
 const TEN_MINUTES = 10 * 60 * 1000;
 const client = jwksClient({
-  jwksUri: process.env.JWK_SET_URI ?? "",
+  jwksUri: process.env.JWK_SET_URI,
   cache: true,
   cacheMaxEntries: 5,
   cacheMaxAge: TEN_MINUTES,
+  rateLimit: true,
+  jwksRequestsPerMinute: 10, // Default value
 });
 
 // Get signing key from JWKS
-const getKey = (header: any, callback: any) => {
-  console.log("client: ", client);
-  // kid means key identifier, used to find the correct key
+const getPublicSigningKey = (header: any, callback: any) => {
+  console.log("client: ", client); // TODO: Remove this
+  // kid means key identifier
   client.getSigningKey(header.kid, (err, key) => {
     if (err) {
-      logger.error('Error getting signing key:', err);
+      logger.error('Error getting public signing key:', err);
       return callback(err);
     }
-    const signingKey = key?.getPublicKey();
-    callback(null, signingKey);
+    const publicSigningKey = key?.getPublicKey(); // key used to verify the JWT signature
+    callback(null, publicSigningKey);
   });
 };
 
 // JWT validation middleware
 export const validateJWT = async (req: Request, _: Response, next: NextFunction): Promise<void> => {
+  if(!process.env.ISSUER_URI)
+    throw new Error("ISSUER_URI is not defined");
+
+  if(!process.env.KEYCLOAK_CLIENT_ID)
+    throw new Error("KEYCLOAK_CLIENT_ID is not defined");
+  
   try {
     const authHeader = req.headers.authorization;
 
     const token = extractToken(authHeader);
 
-    console.log("token", token);
-    console.log("audience:", process.env.KEYCLOAK_CLIENT_ID);
+    console.log("token", token); // TODO: Remove this
     // Verify JWT token
-    jwt.verify(token, getKey, {
+    jwt.verify(token, getPublicSigningKey, {
       audience: process.env.KEYCLOAK_CLIENT_ID,
       issuer: process.env.ISSUER_URI,
       algorithms: ['RS256']
@@ -71,7 +81,7 @@ export const validateJWT = async (req: Request, _: Response, next: NextFunction)
       }
       // Attach user info to request
       req.user = decoded as any;
-      
+      // TODO: remove
       logger.info('JWT validated successfully', {
         userId: req.user?.sub,
         username: req.user?.preferred_username
@@ -98,16 +108,19 @@ const extractToken = (authHeader?: string) => {
 
 // Role-based authorization middleware
 const requireRole = (requiredRole: string) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  if(!process.env.KEYCLOAK_CLIENT_ID)
+  throw new Error("KEYCLOAK_CLIENT_ID is not defined");
+
+  return (req: Request, _: Response, next: NextFunction): void => {
     try {
-      if (!req.user) {
+      if (!req.user)
         throw createError('User not authenticated', 401);
-      }
 
       const userRoles = req.user.realm_access?.roles || [];
-      const clientRoles = req.user.resource_access?.[process.env.KEYCLOAK_CLIENT_ID || '']?.roles || [];
+      const clientRoles = req.user.resource_access?.[process.env.KEYCLOAK_CLIENT_ID ?? '']?.roles || [];
       const allRoles = [...userRoles, ...clientRoles];
 
+      // TODO: remove userID
       if (!allRoles.includes(requiredRole)) {
         logger.warn('Access denied - insufficient permissions', {
           userId: req.user.sub,

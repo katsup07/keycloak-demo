@@ -15,7 +15,7 @@ router.get('/data', requireUser, (req: Request, res: Response) => {
   });
 
   res.json({
-    message: 'This is user-specific data',
+    message: 'This is user specific data',
     timestamp: new Date().toISOString(),
     user: {
       id: req.user?.sub,
@@ -23,6 +23,18 @@ router.get('/data', requireUser, (req: Request, res: Response) => {
       email: req.user?.email,
       roles: req.user?.realm_access?.roles || []
     },
+  });
+});
+
+router.get('/profile', requireUser, (req: Request, res: Response) => {
+  logger.info('User profile endpoint accessed', {
+    userId: req.user?.sub,
+    username: req.user?.preferred_username
+  });
+
+  res.json({
+    message: 'This is a user profile',
+    timestamp: new Date().toISOString(),
     data: {
       userDashboard: 'Welcome to your user dashboard',
       features: [

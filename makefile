@@ -11,7 +11,8 @@ help:
 	@echo "  make dev-all  - Start everything in background (experimental)"
 	@echo "  make stop     - Stop all services"
 	@echo "  make client   - Start React client"
-	@echo "  make server   - Start Spring Boot server"
+	@echo "  make javaServer - Start Spring Boot server"
+	@echo "  make tsServer - Start TypeScript server"
 	@echo "  make logs     - Show container logs"
 	@echo "  make status   - Show container status"
 	@echo "  make clean    - Stop and clean everything"
@@ -39,6 +40,7 @@ stop:
 	@pkill -f "npm run dev" || true
 	@pkill -f "gradlew bootRun" || true
 	@lsof -ti :8081 | xargs kill -9 || true
+	@lsof -ti :8082 | xargs kill -9 || true
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) down
 	@echo "✅ All services stopped"
 
@@ -47,9 +49,13 @@ client:
 	@echo "Starting React client..."
 	cd client && npm run dev
 
-server:
+javaServer:
 	@echo "Starting Spring Boot server..."
 	cd server && ./gradlew bootRun
+
+tsServer:
+	@echo "Starting TypeScript server..."
+	cd server-ts && npm run dev
 
 # Utility commands
 logs:

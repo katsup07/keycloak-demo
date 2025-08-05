@@ -178,21 +178,22 @@ docker exec keycloak-postgres pg_dump -U keycloak keycloak > keycloak_backup_$(d
 ## Critical Security Improvements
 
 ### TypeScript Express
-1. **Token blacklisting/revocation** - **CRITICAL** if users can logout. Without this, logged-out tokens remain valid until expiration
-2. **Request size limits** - **CRITICAL** for production. Prevents simple DoS attacks
-3. **Input validation middleware** - **CRITICAL** to prevent injection attacks
+優先度高
+1. **Token blacklisting/revocation** - if users can logout. Without this, logged-out tokens remain valid until expiration
+優先度中
+2. **Input validation middleware** - to prevent injection attacks
 
 ### Java Spring Boot
-1. **Rate limiting** - **CRITICAL** for production. Your API is vulnerable to abuse without it
-2. **Request size limits** - **CRITICAL** (same reason as TypeScript)
+優先度中
+1. **Request size limits** - for production. Prevents simple DoS attacks
 
 ## Nice to Have (But Not Urgent)
-
 ### Both Platforms
 - **JWKS retry logic** - Keycloak is usually stable, this is more about resilience
 - **Enhanced logging** - Good for debugging, not security-critical
 - **Security headers** - HTTPS + CORS usually covers most needs
 - **IP blocking** - Rate limiting handles most abuse cases
+- **Rate limiting** - Your API is vulnerable to abuse without it in some cases
 
 ## Probably Overkill for Most Apps
 

@@ -46,4 +46,17 @@ router.get('/profile', requireUser, (req: Request, res: Response) => {
   });
 });
 
+router.post('/data', requireUser, (req: Request, res: Response) => {
+  logger.info('User data update endpoint accessed', {
+    userId: req.user?.sub,
+    username: req.user?.preferred_username
+  });
+  res.json({
+    message: 'POST request was sent to /api/user/data',
+    timestamp: new Date().toISOString(),
+    data: req.body || "NO DATA WAS PASSED"
+  });
+
+});
+
 export default router;

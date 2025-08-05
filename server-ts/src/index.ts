@@ -16,6 +16,8 @@ import adminRoutes from './routes/admin';
 import { rateLimiter } from './middleware/rateLimiter';
 import { sendNotFoundError } from './utils/sendNotFoundError';
 
+import { useRequestSizeLimits } from './config/requestSizeConfig';
+
 
 
 const app = express();
@@ -35,21 +37,9 @@ app.use(cors({
 
 app.use(rateLimiter);
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+useRequestSizeLimits(app);
 
 app.use(requestLogger);
-
-// ヘルスチェックエンドポイント
-app.get('/health', (_req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
 
 // APIルート
 app.use('/api/public', publicRoutes);
@@ -75,7 +65,7 @@ process.on('uncaughtException', (error) => {
 
 app.listen(PORT, () => {
   logger.info(`🚀 TypeScript Express server running on port ${PORT}`);
-  logger.info(`📊 Health check available at http://localhost:${PORT}/health`);
+  logger.info(`📊 Health check available at http://localhost:${PORT}/api/public/health`);
   logger.info(`🔒 Keycloak URL: ${process.env.KEYCLOAK_URL}`);
   logger.info(`🌐 CORS origin: ${process.env.CORS_ORIGIN}`);
 });

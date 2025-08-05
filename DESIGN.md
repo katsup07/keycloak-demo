@@ -34,7 +34,7 @@ This project demonstrates how to implement Role-Based Access Control (RBAC) usin
    |                                                      |
    |                                                      |
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React App     │────│  Spring Boot    │────│   Keycloak      │
+│   React App     │────│SpringBoot/Expres│────│   Keycloak      │
 │  (OAuth Client) │    │(Resource Server)│    │ (Auth Server)   │
 │                 │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘

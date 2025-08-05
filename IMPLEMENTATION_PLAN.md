@@ -211,4 +211,4 @@ docker exec keycloak-postgres pg_dump -U keycloak keycloak > keycloak_backup_$(d
 
 - Race condition potential: The cleanup function could theoretically have race conditions with concurrent revocations, though unlikely in practice.
 
-- No token validation in revoke: You might want to validate that the token being revoked actually belongs to the requesting user.
+- No token validation in revoke: Might want to validate that the token being revoked actually belongs to the requesting user.

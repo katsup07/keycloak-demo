@@ -173,14 +173,34 @@ docker exec keycloak-postgres pg_dump -U keycloak keycloak > keycloak_backup_$(d
 - [done] Add proper error responses (401, 403, 500) with consistent format
 - [done] Include request validation and sanitization
 
-#### Step 4.4: Backend Comparison & Testing
-- [] Run both backends simultaneously (Java on 8081, TS on 8082)
-- [] Add backend selection toggle in React frontend
-- [] Create environment variable to switch between backends
+### TODO
+### Improvements for Typescript and Java Servers
+## Critical Security Improvements
 
+### TypeScript Express
+1. **Token blacklisting/revocation** - **CRITICAL** if users can logout. Without this, logged-out tokens remain valid until expiration
+2. **Request size limits** - **CRITICAL** for production. Prevents simple DoS attacks
+3. **Input validation middleware** - **CRITICAL** to prevent injection attacks
 
-<!-- #### Step 4.5: Containerization & Deployment
-- [] Create Dockerfile for TypeScript backend
-- [] Update docker-compose.yml to include TS backend option
-- [] Configure health checks and monitoring
-- [] Document deployment differences between Java and TS backends -->
+### Java Spring Boot
+1. **Rate limiting** - **CRITICAL** for production. Your API is vulnerable to abuse without it
+2. **Request size limits** - **CRITICAL** (same reason as TypeScript)
+
+## Nice to Have (But Not Urgent)
+
+### Both Platforms
+- **JWKS retry logic** - Keycloak is usually stable, this is more about resilience
+- **Enhanced logging** - Good for debugging, not security-critical
+- **Security headers** - HTTPS + CORS usually covers most needs
+- **IP blocking** - Rate limiting handles most abuse cases
+
+## Probably Overkill for Most Apps
+
+### Low Priority Items
+- Request/response encryption beyond HTTPS
+- Geolocation controls
+- API versioning for security (unless you're planning breaking changes)
+- Token caching (performance optimization, not security)
+
+### Must
+- Implement rate limiting and request size limits.

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import * as keycloakService from '../services/keycloakService';
+import { logoutUserOnServer } from '@/services/apiService';
 
 type User = {
   id?: string;
@@ -29,7 +30,7 @@ type AuthState = {
 // 2. ストアの定義: create関数を使って状態とアクションを指定する
 // 3. Getter（get）: 現在の状態を取得するために使用する
 // 4. Setter（set）: 状態を更新するために使用する
-// Note: Keycloakで認証を処理し、Zustandでフロントエンドの状態を管理・同期
+// 備考: Keycloak認証+Zustand状態管理
 // https://zustand.docs.pmnd.rs/getting-started/introduction
 export const useAuthStore = create<AuthState>((set, get) => ({
   // 状態
@@ -92,7 +93,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: () => {
     keycloakService.logout();
-    // 次回マウント/ログイン時に再初期化
+// トークン無効化(server-tsのみ)
+// TODO: Springboot側実装
+    if(import.meta.env.VITE_API_BASE_URL === 'http://localhost:8082/api')
+     logoutUserOnServer();
+   
     set({
       user: null,
       isAuthenticated: false,

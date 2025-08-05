@@ -11,7 +11,7 @@ const apiClient = axios.create({
   },
 });
 
-// ミドルウェア - リクエストに認証トークン追加
+// 認証トークン付与ミドルウェア
 apiClient.interceptors.request.use(
   async (config) => {
     const token = keycloakService.getToken();
@@ -81,6 +81,15 @@ export const getUserData = async (): Promise<any> => {
   }
 };
 
+export const logoutUserOnServer = async (): Promise<void> => {
+  try {
+    await apiClient.post('/user/logout');
+  } catch (error) {
+    console.warn('Failed to logout user:', error);
+    throw error;
+  }
+};
+
 export const getUserProfile = async (): Promise<any> => {
   try {
     const response: AxiosResponse = await apiClient.get('/user/profile');
@@ -91,7 +100,7 @@ export const getUserProfile = async (): Promise<any> => {
   }
 };
 
-// 汎用API呼び出しヘルパー
+// 汎用APIヘルパー
 export const apiCall = async <T>(config: AxiosRequestConfig): Promise<T> => {
   try {
     const response: AxiosResponse<T> = await apiClient(config);

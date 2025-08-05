@@ -1,4 +1,4 @@
-// 認証用ユーティリティ
+// 認証ユーティリティ
 import * as keycloakService from '../services/keycloakService';
 
 export const getBearerHeader = () => {

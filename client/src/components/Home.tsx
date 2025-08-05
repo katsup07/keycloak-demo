@@ -16,7 +16,7 @@ export const Home = () => {
             You are successfully authenticated with Keycloak.
           </p>
           
-          {/* ユーザー情報 */}
+          {/* ユーザ情報 */}
           {user && (
             <div className="bg-gray-800 rounded-lg p-6 mb-6 text-left">
               <h3 className="text-xl font-semibold text-white mb-4">Your Profile</h3>

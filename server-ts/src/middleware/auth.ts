@@ -3,6 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { logger } from '../utils/logger';
 import { createError } from './errorHandler';
+import { isTokenRevoked } from '../services/tokenBlacklist';
 
 // リクエストインターフェースを拡張してユーザー情報を含める
 declare global {
@@ -10,6 +11,8 @@ declare global {
     interface Request {
       user?: {
         sub: string;
+        jwtId?: string; // JWT ID(jti)
+        expiresAt?: number; // 有効期限(exp)
         email?: string;
         preferred_username?: string;
         realm_access?: {
@@ -26,7 +29,9 @@ declare global {
 }
 
 interface CustomJwtPayload extends JwtPayload {
-  sub: string;
+  sub: string; 
+  jwtId?: string;
+  expiresAt?: number;
 }
 
 if(!process.env.JWK_SET_URI) 
@@ -83,8 +88,18 @@ export const validateJWT = async (req: Request, _res: Response, next: NextFuncti
         logger.error('JWT verification failed:', err);
         return next(createError('Invalid token', 401));
       }
-      // ユーザー情報をリクエストに添付する
-      req.user = decoded as CustomJwtPayload;
+
+      const user = makeCustomJwtPayload(decoded);    
+      // トークンBL確認
+      if (user.jwtId && isTokenRevoked(user.jwtId)) {
+        logger.warn('Attempted to use revoked token', { 
+          jwtId: user.jwtId.substring(0, 8) + '...',
+          userId: user.sub 
+        });
+        return next(createError('Token has been revoked', 401));
+      }
+
+      req.user = user;
 
       next();
     });
@@ -92,6 +107,23 @@ export const validateJWT = async (req: Request, _res: Response, next: NextFuncti
     next(error);
   }
 };
+
+const makeCustomJwtPayload = (jwtPayload?: string | jwt.JwtPayload): CustomJwtPayload => {
+  if (!jwtPayload || typeof jwtPayload === 'string')
+    throw new Error("Invalid JWT payload");
+  
+  if (!jwtPayload.sub)
+    throw new Error("JWT payload missing required 'sub' claim");
+
+  const { jti, exp, sub, ...rest } = jwtPayload;
+
+  return {
+    ...rest,
+    sub,
+    jwtId: jti, // 可読性向上
+    expiresAt: exp,
+  };
+}
 
 // authHeader: "Bearer eyJhbGciOiJSUzI1..."
 const extractToken = (authHeader?: string) => {
@@ -139,6 +171,6 @@ const requireRole = (requiredRole: string) => {
   };
 };
 
-// 一般的なロールのための便利なミドルウェア
+// 汎用ロールMW
 export const requireAdmin = requireRole('admin');
 export const requireUser = requireRole('user');

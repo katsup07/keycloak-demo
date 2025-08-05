@@ -9,7 +9,7 @@ import { UserDashboard } from '@/components/dashboard/UserDashboard';
 import { UnauthorizedPage } from '@/components/common/UnauthorizedPage';
 import { ProtectedRoute }from '@/components/auth/ProtectedRoute';
 
-// Layout component that wraps all routes
+// 全ルート共通レイアウト
 const Layout = () => (
   <div className="min-h-screen bg-black">
     <Navigation />
@@ -20,7 +20,7 @@ const Layout = () => (
   </div>
 );
 
-// Route configuration object
+// ルート設定obj
 const router = createBrowserRouter([
   {
     path: "/",

@@ -17,7 +17,7 @@ const injectCspMetaTag = () => {
   }
 }
 
-// https://vite.dev/config/
+// Vite設定
 export default defineConfig({
   plugins: [react(), injectCspMetaTag()],
   resolve: {

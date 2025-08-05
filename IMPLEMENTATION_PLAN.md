@@ -205,3 +205,10 @@ docker exec keycloak-postgres pg_dump -U keycloak keycloak > keycloak_backup_$(d
 
 ### Must
 - Implement rate limiting and request size limits.
+
+### Considerations to adjust in Server-TS
+- Memory-only storage: This works for single-instance deployments but won't scale across multiple server instances. Consider Redis for production.
+
+- Race condition potential: The cleanup function could theoretically have race conditions with concurrent revocations, though unlikely in practice.
+
+- No token validation in revoke: You might want to validate that the token being revoked actually belongs to the requesting user.

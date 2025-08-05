@@ -19,7 +19,7 @@ export const UserDashboard = () => {
       setLoading(true)
       setError(null)
       
-      // トークン更新インターセプタテスト用に複数API呼び出し
+      // 複数API呼出(トークン更新テスト)
       const [dataResponse, profileResponse] = await Promise.allSettled([
         getUserData(),
         getUserProfile()

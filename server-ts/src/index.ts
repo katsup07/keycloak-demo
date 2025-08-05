@@ -17,6 +17,8 @@ import { rateLimiter } from './middleware/rateLimiter';
 import { sendNotFoundError } from './utils/sendNotFoundError';
 
 import { useRequestSizeLimits } from './config/requestSizeConfig';
+import { initializeTokenBlacklist, destroyTokenBlacklist } from './services/tokenBlacklist';
+import { gracefulShutdown } from './utils/gracefulShutdown';
 
 
 
@@ -62,6 +64,13 @@ process.on('uncaughtException', (error) => {
   logger.error('Uncaught Exception thrown:', error);
   process.exit(1);
 });
+
+// トークンBLサービス初期化
+initializeTokenBlacklist();
+
+// グレースフルシャットダウン
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM', destroyTokenBlacklist));
+process.on('SIGINT', () => gracefulShutdown('SIGINT', destroyTokenBlacklist));
 
 app.listen(PORT, () => {
   logger.info(`🚀 TypeScript Express server running on port ${PORT}`);

@@ -1,10 +1,10 @@
-// APIサービス用トークン更新＆エラ処理ユーティリティ
+// API用トークン更新&エラー処理
 import * as keycloakService from './keycloakService';
 import { getBearerHeader } from '@/utils/authUtils';
 import Keycloak from 'keycloak-js';
 import { TOKEN_MIN_VALIDITY } from './constants';
 
-// 複数の同時リフレッシュ試行を防ぐため
+// 同時リフレ防止
 let refreshTokenResultPromise: Promise<boolean> | null = null;
 
 // トークン更新処理
@@ -48,7 +48,7 @@ const handleAuthFailure = (message: string): Promise<never> => {
   return Promise.reject(new Error('Authentication failed'));
 };
 
-// 新トークンでリクエスト再試行
+// 新トークンで再試行
 const retryRequestWithNewToken = async (originalRequest: any, apiClient: any): Promise<any> => {
   const newToken = keycloakService.getToken();
   if (!newToken)
@@ -60,7 +60,7 @@ const retryRequestWithNewToken = async (originalRequest: any, apiClient: any): P
 };
 
 
-// エラーがトークンリフレッシュをトリガーするかどうかを判定する
+// エラーでリフレ判定
 export const shouldRefreshToken = (error: any, originalRequest: any): boolean => {
   return error.response?.status === 401 && !originalRequest._retry;
 };

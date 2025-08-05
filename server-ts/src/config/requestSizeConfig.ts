@@ -13,7 +13,7 @@ export const useRequestSizeLimits = (app: Express): void => {
   app.use(express.json({ 
     limit: sizeLimits.json,
     verify: (req, res, buf) => {
-      // Store raw body for potential debugging
+      // デバッグ用raw body保存
       (req as any).rawBody = buf;
     }
   }));
@@ -35,6 +35,6 @@ export const useRequestSizeLimits = (app: Express): void => {
 
   app.use(requestSizeErrorHandler);
 
-  // Log the configured limits
+  // 設定サイズ出力
   logger.info(`📏 Request size limits configured - JSON: ${sizeLimits.json}, URL-encoded: ${sizeLimits.urlencoded}, Raw: ${sizeLimits.raw}, Text: ${sizeLimits.text}`);
 };

@@ -19,7 +19,7 @@ import java.util.Arrays;
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
-  private static final long CORS_MAX_AGE = 3600L; // 1 hour
+  private static final long CORS_MAX_AGE = 3600L; // CORSの最大有効期間（1時間）
 
   @Value("${cors.allowed-origins}")
   private String[] allowedOrigins;

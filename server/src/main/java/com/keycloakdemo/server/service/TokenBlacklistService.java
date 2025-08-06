@@ -10,18 +10,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Service for managing JWT token blacklist/revocation.
- * Provides in-memory storage for revoked tokens with automatic cleanup of expired tokens.
+ * JWTトークンのブラックリスト/無効化を管理するサービス。
+ * 期限切れトークンの自動クリーンアップを備えたインメモリストレージを提供します。
  */
 @Service
 public class TokenBlacklistService {
     private static final long CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
     private static final Logger logger = LoggerFactory.getLogger(TokenBlacklistService.class);
     
-    // Time drift buffer to handle clock skew between servers (5 minutes in seconds)
+    // サーバー間の時計のずれ（5分間）を処理するための時間ドリフトバッファ（秒単位）
     private static final long TIME_DRIFT_BUFFER_SECONDS = 5 * 60;
     
-    // In-memory storage for blacklisted tokens
+    // ブラックリストに登録されたトークンのインメモリストレージ
     private final ConcurrentHashMap<String, BlacklistedToken> blacklistedTokens = new ConcurrentHashMap<>();
     
     /**

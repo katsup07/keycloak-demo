@@ -17,8 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Custom authentication entry point that handles OAuth2 authentication failures
- * and returns structured JSON error responses instead of generic 401 responses.
+ * OAuth2認証の失敗を処理し、一般的な401応答の代わりに構造化されたJSONエラー応答を返すカスタム認証エントリポイント。
  */
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
@@ -40,23 +39,32 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     // Handle specific OAuth2 authentication exceptions (like revoked tokens)
     if (authException instanceof OAuth2AuthenticationException oauth2Exception) {
-      String errorCode = oauth2Exception.getError().getErrorCode();
-      String description = oauth2Exception.getError().getDescription();
-
-      errorResponse.put("error", "Token Authentication Failed");
-
-      if ("token_revoked".equals(errorCode)) {
-        errorResponse.put("message",
-            description != null ? description : "Token has been revoked. Please log in again.");
-      } else {
-        errorResponse.put("message", description != null ? description : "Invalid authentication token");
-      }
+      handleOAuth2Exception(oauth2Exception, errorResponse);
     } else {
-      // Handle other authentication exceptions
-      errorResponse.put("error", "Authentication Failed");
-      errorResponse.put("message", "Invalid or missing authentication token");
+      handleGenericAuthenticationException(errorResponse);
     }
 
     objectMapper.writeValue(response.getOutputStream(), errorResponse);
   }
+
+  // Helper method for OAuth2 exceptions
+private void handleOAuth2Exception(OAuth2AuthenticationException oauth2Exception, Map<String, Object> errorResponse) {
+   String errorCode = oauth2Exception.getError().getErrorCode();
+   String description = oauth2Exception.getError().getDescription();
+
+   errorResponse.put("error", "Token Authentication Failed");
+
+  if ("token_revoked".equals(errorCode)) {
+    errorResponse.put("message", description != null ? description : "Token has been revoked. Please log in again.");
+   } else {
+    errorResponse.put("message", description != null ? description : "Invalid authentication token");
+  }
+}
+
+// Helper method for generic authentication exceptions
+private void handleGenericAuthenticationException(Map<String, Object> errorResponse) {
+    errorResponse.put("error", "Authentication Failed");
+    errorResponse.put("message", "Invalid or missing authentication token");
+ }
+  
 }

@@ -29,6 +29,7 @@ public class UserController {
         this.tokenBlacklistService = tokenBlacklistService;
     }
 
+    // ユーザーのデータを取得するエンドポイント
     @GetMapping("/data")
     @PreAuthorize("hasAnyRole('user', 'admin')")
     public Map<String, Object> getUserData(Authentication authentication) {

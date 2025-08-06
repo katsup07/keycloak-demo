@@ -179,9 +179,11 @@ docker exec keycloak-postgres pg_dump -U keycloak keycloak > keycloak_backup_$(d
 
 ### TypeScript Express
 優先度高
-1. [done]**Token blacklisting/revocation** - if users can logout. Without this, logged-out tokens remain valid until expiration
-優先度中
+1. [done]**Token blacklisting/revocation** - on logout
 2. **Input validation middleware** - to prevent injection attacks
+
+### Java Spring Boot
+1. [done]**Token blacklisting/revocation** - on logout
 
 ### Java Spring Boot
 優先度中

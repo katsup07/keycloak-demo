@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
@@ -21,8 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Custom JWT authentication converter that extracts Keycloak roles and checks
- * token blacklist
+ * Keycloakのロールを抽出し、トークンのブラックリストを確認するカスタムJWT認証コンバータ
  */
 @Component
 public class JwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {

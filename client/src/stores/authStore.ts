@@ -93,10 +93,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: () => {
     keycloakService.logout();
-// トークン無効化(server-tsのみ)
-// TODO: Springboot側実装
-    if(import.meta.env.VITE_API_BASE_URL === 'http://localhost:8082/api')
-     logoutUserOnServer();
+    logoutUserOnServer();
    
     set({
       user: null,

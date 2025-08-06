@@ -36,14 +36,21 @@ public class AdminController {
         
         logger.info("Admin data endpoint accessed by: {}", username);
         
+        // Get blacklist statistics
+        TokenBlacklistService.BlacklistStats blacklistStats = tokenBlacklistService.getBlacklistStats();
+        
         Map<String, Object> response = new HashMap<>();
         response.put("message", "This is admin-only data");
         response.put("user", username);
         response.put("timestamp", Instant.now().toString());
         response.put("data", Map.of(
-            "totalUsers", 150,
+            "totalUsers", 160,
             "systemHealth", "Good",
-            "lastBackup", "2025-07-24T10:30:00Z"
+            "lastBackup", "2025-07-24T10:30:00Z",
+            "tokenBlacklist", Map.of(
+                "totalBlacklistedTokens", blacklistStats.getTotalBlacklistedTokens(),
+                "cleanupIntervalMs", blacklistStats.getCleanupIntervalMs()
+            )
         ));
         
         return response;
@@ -87,6 +94,8 @@ public class AdminController {
         
         return response;
     }
+    
+
     
     /**
      * Extract JWT from Spring Security Authentication

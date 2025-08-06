@@ -203,7 +203,8 @@ Detailed implementation steps can be found here: [IMPLEMENTATION_PLAN.md](./IMPL
 3. Set up secure cookie storage mechanism
 4. Add token revocation endpoint calls
 
-### Enhancement 2: Enhanced Security Features
+### TODO - Optional Enhancements ###
+<!-- ### Enhancement 2: Enhanced Security Features
 **Implementation Time**: 1-2 days
 
 #### Features:
@@ -292,4 +293,4 @@ Detailed implementation steps can be found here: [IMPLEMENTATION_PLAN.md](./IMPL
 2. **Scalability**: Consider Keycloak clustering for production
 3. **Additional Features**: Implement social login, user self-registration
 4. **Monitoring**: Set up comprehensive logging and monitoring
-5. **Documentation**: Create user guides and API documentation
+5. **Documentation**: Create user guides and API documentation -->

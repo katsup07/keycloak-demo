@@ -40,6 +40,8 @@ services:
       - "8080:8080"
     networks:
       - keycloak-network
+    volumes:
+      - ./keycloak-themes:/opt/keycloak/themes
 
 volumes:
   postgres_data:

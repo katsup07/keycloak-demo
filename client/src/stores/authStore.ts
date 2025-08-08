@@ -92,6 +92,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: () => {
+    console.log("Logging user out...");
     keycloakService.logout();
     logoutUserOnServer();
    
@@ -103,7 +104,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       isLoading: true,
     });
   },
-
   refreshUser: () => {
     if (keycloakService.isAuthenticated()) {
       const userInfo = keycloakService.getUserInfo();

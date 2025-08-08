@@ -1,42 +1,44 @@
-# Keycloak OAuth2 RBAC Demo - Design Document
+# Iwaizumi Farm Ordering System - Design Document
 
 ## Table of Contents
 1. [Project Overview](#project-overview)
 2. [Architecture Overview](#architecture-overview)
-3. [OAuth2 Flow Diagram](#oauth2-flow-diagram)
+3. [Login System Integration](#login-system-integration)
 4. [Component Details](#component-details)
-5. [Security Considerations](#security-considerations)
+5. [UI/UX Design](#ui-ux-design)
 6. [Implementation Plan](#implementation-plan)
-7. [Optional Enhancements](#optional-enhancements)
+7. [Future Enhancements](#future-enhancements)
 
 ## Project Overview
 
-This project demonstrates how to implement Role-Based Access Control (RBAC) using Keycloak as an identity provider with OAuth2/OpenID Connect, featuring a React frontend and Spring Boot backend.
+This project is the Iwaizumi Farm Ordering System (岩泉ファーム発注システム) - a Japanese farm ordering application with role-based access control using Keycloak authentication, featuring a React frontend and Spring Boot backend.
 
 ### Goals
-- Test Keycloak's OAuth2 implementation
-- Implement RBAC with admin and user roles
-- Demonstrate secure token-based authentication
-- Create a production-ready authentication flow
+- Convert HTML mock login system to React components
+- Integrate Japanese UI with existing Keycloak OAuth2 authentication
+- Implement store-code based authentication flow
+- Create responsive, accessible Japanese interface
+- Maintain existing RBAC with admin and user roles
 
 ### Technology Stack
-- **Frontend**: React with Keycloak JavaScript adapter
+- **Frontend**: React 18 with TypeScript, Tailwind CSS
+- **Authentication**: Keycloak JavaScript adapter with OAuth2/OIDC
 - **Backend**: Spring Boot with Keycloak integration
 - **Identity Provider**: Keycloak (Docker container)
 - **Database**: PostgreSQL (for Keycloak data storage)
+- **UI Framework**: Custom CSS with Japanese typography support
 
 ## Architecture Overview
 
 ```
-
                       Auth/Token Requests 
    ________________________________________________________
    |                                                      |
    |                                                      |
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   React App     │────│SpringBoot/Expres│────│   Keycloak      │
-│  (OAuth Client) │    │(Resource Server)│    │ (Auth Server)   │
-│                 │    │                 │    │                 │
+│ (Japanese UI)   │    │(Resource Server)│    │ (Auth Server)   │
+│ Store Code Auth │    │                 │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
                API Calls w/JWT      Token Validation     |
                                                          │
@@ -49,20 +51,50 @@ This project demonstrates how to implement Role-Based Access Control (RBAC) usin
                                                   └─────────────────┘
 ```
 
-**Interactions:**
-- **React App ↔ Keycloak**: Authentication, token requests, user login/logout
-- **React App ↔ Spring Boot**: API calls with JWT tokens attached
-- **Spring Boot ↔ Keycloak**: JWT token validation via API endpoints (JWKS, token introspection)
-- **Keycloak ↔ PostgreSQL**: Direct database access for user/role/session management
+**New Login Flow Integration:**
+- **Store Code Authentication**: Custom login form captures store code + password
+- **Keycloak Integration**: Store credentials mapped to Keycloak users/roles
+- **Japanese UI**: All interface elements in Japanese with proper typography
+- **Responsive Design**: Mobile-first approach with Japanese text considerations
 ### Directory Structure
-keycloak-demo/
-├── client/                # Frontend code
-├── server/                # Backend code
-├── infra/                 # Infrastructure - containers for Auth(Keycloak) and DB(PostgreSQL)
-├── README.md              # Main project docs
-├── DESIGN.md
-├── IMPLEMENTATION_PLAN.md
-└── LICENSE
+iwaizumi-farm-system/
+├── client/                # React frontend with Japanese UI
+│   ├── src/
+│   │   ├── features/
+│   │   │   ├── login/     # Japanese login components
+│   │   │   ├── dashboard/ # Farm ordering dashboards
+│   │   │   └── common/    # Shared components
+│   │   ├── assets/        # Images, fonts for Japanese UI
+│   │   └── styles/        # CSS with Japanese typography
+├── server/                # Spring Boot backend
+├── infra/                 # Keycloak + PostgreSQL containers
+├── iwaizumi-mock/         # Original HTML mock (reference)
+└── docs/                  # Project documentation
+
+## Login System Integration
+
+### Store Code Authentication Flow
+
+The system uses a two-tier authentication approach:
+1. **Custom Login Form**: Japanese interface with store code + password
+2. **Keycloak Backend**: OAuth2/OIDC for token management and RBAC
+
+### Store Code Mapping Strategy
+
+**Option A: Direct Keycloak Integration (Recommended)**
+- Store codes map directly to Keycloak usernames
+- Example: Store code "STORE001" → Keycloak user "STORE001"
+- Roles assigned in Keycloak (admin/user based on store type)
+
+**Option B: Custom Authentication Layer**
+- Custom backend validates store codes
+- Issues Keycloak tokens programmatically
+- More complex but allows custom business logic
+
+### User Role Mapping
+- **Admin Stores**: Large distribution centers, headquarters
+- **User Stores**: Individual retail locations
+- **Store Code Format**: Configurable (e.g., "STORE001", "HQ-TOKYO")
 
 ## OAuth2 Flow Diagram
 
@@ -124,20 +156,22 @@ sequenceDiagram
 - Roles: `admin`, `user`
 - Users: Test users with different roles
 
-### 2. React Frontend (OAuth Client)
-**Purpose**: User interface with role-based access control
+### 2. React Frontend (Japanese Farm Ordering UI)
+**Purpose**: Japanese farm ordering interface with role-based access control
 
 **Responsibilities**:
-- Handle OAuth2 authentication flow
+- Custom Japanese login form with store code authentication
+- Handle OAuth2 authentication flow behind the scenes
 - Store and manage tokens securely
-- Implement role-based UI rendering
+- Implement role-based UI rendering for farm operations
 - Make authenticated API calls to backend
 
 **Pages/Components**:
-- Login page (redirects to Keycloak)
-- Admin dashboard (admin role required)
-- User dashboard (user role required)
-- Logout functionality
+- **Login Page**: Japanese interface with store code + password fields
+- **Admin Dashboard**: Farm management, store management, order oversight
+- **User Dashboard**: Order placement, inventory viewing, store-specific data
+- **Navigation**: Japanese menu with role-based items
+- **Error Pages**: Japanese error messages and validation
 
 ### 3. Spring Boot Backend (Resource Server)
 **Purpose**: Protected API endpoints with RBAC
@@ -160,6 +194,41 @@ sequenceDiagram
 - Persist Keycloak realms, clients, users, and roles
 - Store user sessions and tokens
 - Maintain audit logs
+- Store store code mappings and farm-specific data
+
+## UI/UX Design
+
+### Japanese Typography & Styling
+- **Font Stack**: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo
+- **Color Scheme**: 
+  - Primary: `#be9124` (Golden brown - farm theme)
+  - Background: `#f0f2f5` (Light gray)
+  - Text: `#333333` (Dark gray)
+  - Error: `#dc3545` (Red)
+
+### Component Design Principles
+- **Mobile-First**: Responsive design starting from 320px width
+- **Accessibility**: ARIA labels, keyboard navigation, high contrast
+- **Japanese UX**: Right-to-left reading patterns, appropriate spacing
+- **Farm Branding**: Cow logo, agricultural color palette
+
+### Key UI Components
+1. **Login Form**:
+   - Store code input with validation
+   - Password field with show/hide toggle
+   - Japanese error messages
+   - "Forgot password" link
+   - Responsive layout (desktop/mobile)
+
+2. **Navigation**:
+   - Role-based menu items in Japanese
+   - User info display with store code
+   - Logout functionality
+
+3. **Dashboards**:
+   - Farm-themed layouts
+   - Data tables with Japanese headers
+   - Action buttons with Japanese labels
 
 ## Security Considerations
 

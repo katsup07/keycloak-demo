@@ -44,7 +44,7 @@ export const initializeKeycloak = async (): Promise<boolean> => {
 
     // iframe経由で安全通信
     const authenticated = await keycloak.init({
-      onLoad: 'check-sso',
+      onLoad: 'login-required',
       silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
       checkLoginIframe: true,
       pkceMethod: 'S256', 

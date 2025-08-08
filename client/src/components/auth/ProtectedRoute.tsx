@@ -9,16 +9,14 @@ type Props = {
 export const ProtectedRoute = ({ children, requiredRole = null }: Props) => {
   const { isAuthenticated, hasRole, isLoading } = useAuthStore()
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-64">
-        <div className="text-lg text-gray-600">Loading...</div>
-      </div>
-    )
-  }
+  
 
+  if (isLoading)
+    return <Loading />;
+
+  // 認証されていない場合はkeycloak-jsがリダイレクトを処理する
   if (!isAuthenticated)
-    return <Navigate to="/" replace />
+    return <Loading />;
   
 
   if (requiredRole && !hasRole(requiredRole))
@@ -27,3 +25,9 @@ export const ProtectedRoute = ({ children, requiredRole = null }: Props) => {
 
   return children
 }
+
+const Loading = () => (
+  <div className="flex justify-center items-center min-h-64">
+    <div className="text-lg text-gray-600">Loading...</div>
+  </div>
+);

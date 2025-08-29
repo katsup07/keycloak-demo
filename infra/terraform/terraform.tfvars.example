@@ -1,0 +1,13 @@
+# Example variables for local development (no secrets)
+# Copy to terraform.tfvars and fill in locally, or use environment variables TF_VAR_<name>
+
+keycloak_username  = "admin"
+keycloak_password  = "admin"
+keycloak_url       = "http://localhost:8080"
+keycloak_client_id = "admin-cli"
+keycloak_realm     = "master"
+
+# Do NOT store client secrets here in VCS.
+# Provide via environment variables instead:
+#   export TF_VAR_spring_boot_client_secret="..."
+#   export TF_VAR_typescript_express_client_secret="..."

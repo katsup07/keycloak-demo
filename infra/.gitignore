@@ -1,1 +1,31 @@
 .env
+terraform.tfvars
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate.backup
+*.tfstate
+crash.log
+
+# Keycloak exports (JSON) and any user exports — do not commit PII
+keycloak-migration/keycloak-export/*.json
+
+# Migration helper artifacts (if any temp files are created)
+keycloak-migration/*.tmp
+keycloak-migration/*.log
+
+# Terraform local artifacts and generated files
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate*
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/crash.log
+
+# Generated resources (converter output) and timestamped variants
+terraform/generated-resources.tf
+terraform/newly-generated-resources/
+
+# Local tfvars (keep example tracked)
+terraform/terraform.tfvars
+!terraform/terraform.tfvars.example

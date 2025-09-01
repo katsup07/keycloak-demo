@@ -60,6 +60,9 @@ function accessType(client) {
 
 function generateTerraformFromRealm(realm, opts = {}) {
   const includeMappers = !!opts.includeMappers;
+  const includeUsers = !!opts.includeUsers; // default false to avoid PII in code
+  const includeGroups = !!opts.includeGroups; // generate top-level groups only
+  const includeClientScopes = !!opts.includeClientScopes; // generate custom client scopes
   let out = '';
 
   const realmId = ensureIdentifier(realm.realm);
@@ -254,6 +257,60 @@ resource "keycloak_openid_client_optional_scopes" "${resId}" {
     }
   });
 
+  // Client Scopes (custom only; skip common built-ins)
+  if (includeClientScopes && Array.isArray(realm.clientScopes)) {
+    const builtinScopes = new Set(['profile','email','roles','web-origins','acr','address','phone','microprofile-jwt']);
+    realm.clientScopes.forEach((scope) => {
+      if (!scope || !scope.name) return;
+      if (builtinScopes.has(scope.name)) return;
+      const sid = ensureIdentifier(scope.name);
+      out += `
+resource "keycloak_openid_client_scope" "${sid}" {
+  realm_id = keycloak_realm.${realmId}.id
+  name     = "${escHCL(scope.name)}"
+  ${scope.description ? `description = "${escHCL(scope.description)}"` : ''}
+  include_in_token_scope   = ${bool(scope.attributes && (scope.attributes['include.in.token.scope'] === 'true'), true)}
+  display_on_consent_screen = ${bool(scope.attributes && (scope.attributes['display.on.consent.screen'] === 'true'), false)}
+}
+`;
+
+      // Optional: scope protocol mappers (generic fallback only, to keep it simple and safe)
+      if (includeMappers && Array.isArray(scope.protocolMappers) && scope.protocolMappers.length) {
+        scope.protocolMappers.forEach((pm, idx) => {
+          if (!pm || pm.protocol !== 'openid-connect') return;
+          const cfg = pm.config || {};
+          const pmId = ensureIdentifier(`${scope.name}_${pm.name || 'mapper'}_${idx}`);
+          out += `
+resource "keycloak_generic_client_protocol_mapper" "${pmId}" {
+  realm_id       = keycloak_realm.${realmId}.id
+  client_scope_id = keycloak_openid_client_scope.${sid}.id
+  name           = "${escHCL(pm.name || pm.protocolMapper)}"
+  protocol       = "openid-connect"
+  protocol_mapper = "${escHCL(pm.protocolMapper)}"
+  config = {
+${Object.entries(cfg).map(([k, v]) => `    "${escHCL(k)}" = "${escHCL(v)}"`).join('\n')}
+  }
+}
+`;
+        });
+      }
+    });
+  }
+
+  // Groups (top-level only to avoid complex parent-child ordering here)
+  if (includeGroups && Array.isArray(realm.groups)) {
+    (realm.groups || []).forEach((g) => {
+      if (!g || !g.name) return;
+      const gid = ensureIdentifier(g.name);
+      out += `
+resource "keycloak_group" "${gid}" {
+  realm_id = keycloak_realm.${realmId}.id
+  name     = "${escHCL(g.name)}"
+}
+`;
+    });
+  }
+
   // Realm roles
   const skipRoles = new Set(['offline_access', 'uma_authorization']);
   ((realm.roles && realm.roles.realm) || []).forEach((role) => {
@@ -270,13 +327,13 @@ resource "keycloak_role" "${rid}" {
 `;
   });
 
-  // Users (if present in realm export)
-  (realm.users || []).forEach((user) => {
-    if (!user || !user.username) return;
-    if (user.username === 'admin') return;
-
-    const uid = ensureIdentifier(user.username.replace(/[@.]/g, '_'));
-    out += `
+  // Users (optional; off by default to avoid PII in code)
+  if (includeUsers) {
+    (realm.users || []).forEach((user) => {
+      if (!user || !user.username) return;
+      if (user.username === 'admin') return;
+      const uid = ensureIdentifier(user.username.replace(/[@.]/g, '_'));
+      out += `
 resource "keycloak_user" "${uid}" {
   realm_id = keycloak_realm.${realmId}.id
   username = "${escHCL(user.username)}"
@@ -289,7 +346,8 @@ resource "keycloak_user" "${uid}" {
   ${user.email ? `email = "${escHCL(user.email)}"` : ''}
 }
 `;
-  });
+    });
+  }
 
   return out;
 }
@@ -320,7 +378,10 @@ function main() {
 
   const realmData = JSON.parse(fs.readFileSync(inputPath, 'utf8'));
   const includeMappers = args.mappers === true || String(args.mappers).toLowerCase() === 'true';
-  const tf = generateTerraformFromRealm(realmData, { includeMappers });
+  const includeUsers = args.includeUsers === true || String(args.includeUsers).toLowerCase() === 'true';
+  const includeGroups = args.includeGroups === true || String(args.includeGroups).toLowerCase() === 'true';
+  const includeClientScopes = args.includeClientScopes === true || String(args.includeClientScopes).toLowerCase() === 'true';
+  const tf = generateTerraformFromRealm(realmData, { includeMappers, includeUsers, includeGroups, includeClientScopes });
 
   // Ensure output dir exists
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });

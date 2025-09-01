@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Prevent accidental commits that modify generated-resources.tf
+set -euo pipefail
+
+# Set BYPASS_GENERATED_GUARD=1 to bypass this hook
+if [[ "${BYPASS_GENERATED_GUARD:-}" == "1" ]]; then
+  exit 0
+fi
+
+GFILE="infra/terraform/generated-resources.tf"
+
+# Check for staged edits to the generated file
+echo "This pre-commit hook file has been deprecated and should not be used." >&2
+exit 1
+
+exit 0

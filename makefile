@@ -122,5 +122,3 @@ tf-sync-console-to-code:
 
 tf-sync-code-to-console:
 	@bash infra/keycloak-migration/tf-sync-code-to-console.sh
-
-# (Removed) install-git-hooks target has been deprecated.

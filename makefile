@@ -24,10 +24,12 @@ help:
 	@echo "  make tf-sync-code-to-console - Code → Console: init, plan, optional apply"
 
 # Start infrastructure containers
+
+
 infra:
 	@echo "🚀 Starting Keycloak Demo Environment..."
-	@echo "1. Starting containers (Postgres + Keycloak)..."
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) up -d
+	@echo "Loading infra/.env into containers and starting (Postgres + Keycloak)..."
+	@$(DOCKER_COMPOSE) --env-file infra/.env -f $(DOCKER_COMPOSE_FILE) up -d
 	@echo "2. Waiting for services to be ready..."
 	@sleep 15
 	@echo "3. Checking container status..."

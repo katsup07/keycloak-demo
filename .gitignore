@@ -45,3 +45,6 @@ spring.log
 server/build/
 
 dist/
+# Infra local env and terraform tfvars
+infra/.env
+infra/terraform/terraform.tfvars

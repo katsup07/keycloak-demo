@@ -16,7 +16,6 @@ keycloak-migration/*.log
 
 # Terraform local artifacts and generated files
 terraform/.terraform/
-terraform/.terraform.lock.hcl
 terraform/terraform.tfstate*
 terraform/*.tfstate
 terraform/*.tfstate.backup

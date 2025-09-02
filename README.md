@@ -138,3 +138,49 @@ React クライアントと Spring Boot サーバーのログは `logs/` ディ�
 ## 📝 Notes
 - `infra` コマンドでインフラを起動
 - クライアントとサーバーは別々のターミナルで実行し、デバッグを容易にする
+
+## 🔁 Keycloak Console → Terraform の整合 (Console → Code)
+
+このリポジトリには、Keycloak コンソール上の既存リソースを Terraform の状態に取り込むための補助スクリプトと手順が含まれています。以下は作業手順の概要と安全上の注意です。
+
+重要: まず `infra/terraform/terraform.tfstate` をバックアップしてください。
+
+手順（要 Keycloak 管理者アカウント、Keycloak が起動していること）:
+
+1. Keycloak 上のリソース UUID を取得
+   ```bash
+   ./infra/keycloak-migration/get-keycloak-ids.sh
+   ```
+
+2. 自動インポート（realm と主要クライアント）
+   ```bash
+   # リポジトリルートから実行
+   infra/terraform/import-existing-keycloak-resources.sh
+   ```
+   このスクリプトは以下を行います：Terraform の初期化、`keycloak_realm` と主要クライアントの `terraform import`。
+
+3. 追加インポート（プロトコルマッパー、ロールなど）
+   - いくつかのリソース（protocol mappers 等）は Provider の import 形式が特殊です。
+   - 役割（roles）は `infra/terraform/imported-roles.tf` を作成してから `terraform import` できます。
+
+主要な生成／追加ファイル（このセッションで追加）:
+- `infra/terraform/import-existing-keycloak-resources.sh` — realm とクライアントをまとめて import するヘルパー
+- `infra/terraform/imported-roles.tf` — 既存の realm role を Terraform に取り込むための最小リソースブロック
+- `infra/terraform/newly-generated-resources/imported-roles.tf` — 同内容の補助コピー
+
+注意事項とヒント:
+- Provider が `keycloak_openid_client_default_scopes` や `keycloak_openid_client_optional_scopes` の import をサポートしていないため、これらは手動で再作成するか、Terraform 側で apply する必要があります（自動 import は不可）。
+- `composite_roles` のように Keycloak コンソールが ID を返す属性については、`lifecycle { ignore_changes = [composite_roles] }` を追加してノイズを避けることを推奨します。
+- クライアントシークレット等の秘密は VCS に入れないでください。`TF_VAR_*` 環境変数か安全なシークレットストアを使用してください。
+- 変更を適用する前に必ず `terraform plan` を確認してください。
+
+基本的な検証コマンド:
+```bash
+# state が正しく取り込まれたことを確認
+terraform -chdir=infra/terraform state list
+
+# 実差分を確認
+terraform -chdir=infra/terraform plan
+```
+
+この手順を README に残しておくことで、他の開発者が同じ Console→Code ワークフローで既存 Keycloak リソースを安全に Terraform に取り込めます。

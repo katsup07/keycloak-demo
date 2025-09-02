@@ -5,7 +5,8 @@ import { getBearerHeader } from '@/utils/authUtils';
 import { shouldRefreshToken, handleTokenRefresh } from './serviceUtils';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api',
+  // Prefer VITE_API_BASE_URL when explicitly set; otherwise use relative '/api' to leverage Vite proxy
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },

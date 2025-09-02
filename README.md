@@ -15,6 +15,37 @@
 - Node.js と npm をインストール済み
 - Java (JDK) をインストール済み
 
+### ⚙️ 依存関係のインストール
+
+各コンポーネントの依存関係は個別にインストールします。以下を各フォルダで実行してください。
+
+- client (React)
+```bash
+cd client
+npm install
+```
+
+- server-ts (TypeScript サーバー)
+```bash
+cd server-ts
+npm install
+```
+
+- server (Java / Gradle)
+このリポジトリは Gradle を使用します。`./gradlew`（Gradle ラッパー）が含まれていればラッパーを使ってビルド/実行してください。ラッパーが無い場合はローカルに Gradle がインストールされていればラッパーを生成できます（例: 8.14.3）：
+
+```bash
+cd server
+# ラッパーを生成（ローカルの gradle が必要）
+gradle wrapper --gradle-version=8.14.3
+
+# ラッパーを使った確認・起動
+./gradlew --version
+./gradlew bootRun
+```
+
+ラッパー関連ファイル（`gradlew`, `gradlew.bat`, `gradle/wrapper/gradle-wrapper.jar`, `gradle/wrapper/gradle-wrapper.properties`）はコントリビューターが簡単に同じ手順で動かせるよう、可能であればリポジトリに含めてください。
+
 ### 🚀 クイックスタート
 
 以下の順序でコマンドを実行してデモ環境を起動：

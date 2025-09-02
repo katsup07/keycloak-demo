@@ -20,7 +20,7 @@ const injectCspMetaTag = () => {
 // Vite設定
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const apiTarget = env.VITE_API_TARGET || 'http://localhost:8081'
+  const apiTarget = env.VITE_API_BASE_URL|| 'http://localhost:8081'
 
   return {
     plugins: [react(), injectCspMetaTag()],

@@ -9,5 +9,5 @@ spring.security.oauth2.resourceserver.jwt.jwk-set-uri=http://localhost:8080/real
 logging.level.org.springframework.security=DEBUG
 logging.level.com.keycloakdemo=DEBUG
 
-keycloak.client-name=your-client-id
+keycloak.client-id=your-client-id
 cors.allowed-origins=http://localhost:3000,http://localhost:8081
